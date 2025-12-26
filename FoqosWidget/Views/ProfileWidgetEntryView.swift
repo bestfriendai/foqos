@@ -51,6 +51,8 @@ struct ProfileWidgetEntryView: View {
       smallWidgetView
     case .systemMedium:
       mediumWidgetView
+    case .systemLarge:
+      largeWidgetView
     case .accessoryCircular:
       circularAccessoryView
     case .accessoryRectangular:
@@ -234,6 +236,165 @@ struct ProfileWidgetEntryView: View {
     }
   }
 
+  // MARK: - Large Widget View
+  private var largeWidgetView: some View {
+    ZStack {
+      VStack(spacing: 16) {
+        // Header section
+        HStack {
+          VStack(alignment: .leading, spacing: 4) {
+            Text(entry.profileName ?? "No Profile")
+              .font(.title2)
+              .fontWeight(.bold)
+              .foregroundColor(shouldUseWhiteText ? .white : .primary)
+              .lineLimit(1)
+
+            if let profile = entry.profileSnapshot {
+              let blockedCount = getBlockedCount(from: profile)
+              Text("\(blockedCount) apps and websites blocked")
+                .font(.subheadline)
+                .foregroundColor(shouldUseWhiteText ? .white.opacity(0.8) : .secondary)
+            }
+          }
+
+          Spacer()
+
+          Image(systemName: entry.isSessionActive ? "shield.fill" : "shield")
+            .font(.largeTitle)
+            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+        }
+
+        Divider()
+          .opacity(shouldUseWhiteText ? 0.3 : 0.5)
+
+        // Status section
+        VStack(spacing: 12) {
+          HStack(spacing: 12) {
+            // Status indicator
+            VStack(alignment: .leading, spacing: 4) {
+              HStack(spacing: 6) {
+                Circle()
+                  .fill(entry.isSessionActive ? (entry.isBreakActive ? Color.orange : Color.green) : Color.gray)
+                  .frame(width: 10, height: 10)
+                Text(entry.isSessionActive ? (entry.isBreakActive ? "On Break" : "Active Session") : "Inactive")
+                  .font(.headline)
+                  .foregroundColor(shouldUseWhiteText ? .white : .primary)
+              }
+
+              if entry.isSessionActive, let startTime = entry.sessionStartTime {
+                Text("Started \(startTime, style: .relative) ago")
+                  .font(.caption)
+                  .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
+              }
+            }
+
+            Spacer()
+
+            // Timer display
+            if entry.isSessionActive, let startTime = entry.sessionStartTime {
+              VStack(alignment: .trailing, spacing: 2) {
+                Text("Elapsed")
+                  .font(.caption)
+                  .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
+                Text(
+                  Date(
+                    timeIntervalSinceNow: startTime.timeIntervalSince1970
+                      - Date().timeIntervalSince1970
+                  ),
+                  style: .timer
+                )
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(shouldUseWhiteText ? .white : .primary)
+                .monospacedDigit()
+              }
+            }
+          }
+
+          // Options summary
+          if let profile = entry.profileSnapshot {
+            HStack(spacing: 16) {
+              OptionBadge(
+                icon: "bell.fill",
+                text: "Reminders",
+                isEnabled: profile.reminderTimeInSeconds != nil,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "cup.and.saucer.fill",
+                text: "Breaks",
+                isEnabled: profile.enableBreaks,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "lock.fill",
+                text: "Strict",
+                isEnabled: profile.enableStrictMode,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "antenna.radiowaves.left.and.right",
+                text: "Live",
+                isEnabled: profile.enableLiveActivity,
+                useWhiteText: shouldUseWhiteText
+              )
+            }
+            .frame(maxWidth: .infinity)
+          }
+        }
+
+        Spacer()
+
+        // Action section
+        if !entry.isSessionActive {
+          Link(destination: linkToOpen) {
+            HStack {
+              Image(systemName: "play.fill")
+              Text(quickLaunchEnabled ? "Tap to Launch" : "Tap to Open")
+            }
+            .font(.headline)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(Color.purple)
+            .cornerRadius(12)
+          }
+        } else if entry.isBreakActive {
+          HStack {
+            Image(systemName: "cup.and.saucer.fill")
+            Text("Taking a break...")
+          }
+          .font(.headline)
+          .foregroundColor(.white)
+          .frame(maxWidth: .infinity)
+          .padding(.vertical, 12)
+          .background(Color.orange.opacity(0.3))
+          .cornerRadius(12)
+        } else {
+          HStack {
+            Image(systemName: "shield.checkered")
+            Text("Focus session in progress")
+          }
+          .font(.headline)
+          .foregroundColor(.white)
+          .frame(maxWidth: .infinity)
+          .padding(.vertical, 12)
+          .background(Color.green.opacity(0.3))
+          .cornerRadius(12)
+        }
+      }
+      .padding()
+      .blur(radius: isUnavailable ? 3 : 0)
+
+      if isUnavailable {
+        unavailableOverlay
+      }
+    }
+  }
+
   // MARK: - Circular Lock Screen Widget
   private var circularAccessoryView: some View {
     ZStack {
@@ -353,6 +514,35 @@ struct ProfileWidgetEntryView: View {
     if profile.schedule != nil { count += 1 }
     if profile.disableBackgroundStops == true { count += 1 }
     return count
+  }
+}
+
+// MARK: - Option Badge Component
+private struct OptionBadge: View {
+  let icon: String
+  let text: String
+  let isEnabled: Bool
+  let useWhiteText: Bool
+
+  var body: some View {
+    VStack(spacing: 4) {
+      Image(systemName: icon)
+        .font(.caption)
+        .foregroundColor(
+          isEnabled
+            ? (useWhiteText ? .white : .primary)
+            : (useWhiteText ? .white.opacity(0.3) : .secondary.opacity(0.5))
+        )
+
+      Text(text)
+        .font(.caption2)
+        .foregroundColor(
+          isEnabled
+            ? (useWhiteText ? .white.opacity(0.8) : .secondary)
+            : (useWhiteText ? .white.opacity(0.3) : .secondary.opacity(0.5))
+        )
+    }
+    .opacity(isEnabled ? 1.0 : 0.5)
   }
 }
 

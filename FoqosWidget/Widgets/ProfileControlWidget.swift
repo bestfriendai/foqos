@@ -34,6 +34,7 @@ struct ProfileControlWidget: Widget {
     .supportedFamilies([
       .systemSmall,
       .systemMedium,
+      .systemLarge,
       .accessoryCircular,
       .accessoryRectangular
     ])
