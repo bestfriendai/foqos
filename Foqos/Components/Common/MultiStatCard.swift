@@ -57,7 +57,7 @@ struct MultiStatCard: View {
       .init(
         title: "Total Focus Time", valueText: "3h 42m", systemImageName: "clock", iconColor: .blue),
       .init(
-        title: "Average Session", valueText: "25m", systemImageName: "chart.bar", iconColor: .purple
+        title: "Average Session", valueText: "25m", systemImageName: "chart.bar", iconColor: .indigo
       ),
       .init(
         title: "Longest Session", valueText: "1h 10m", systemImageName: "timer", iconColor: .green),

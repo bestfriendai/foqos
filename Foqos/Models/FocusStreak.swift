@@ -151,7 +151,7 @@ enum StreakLevel: Int, CaseIterable {
     case .beginner: return "#94a3b8"     // Gray
     case .developing: return "#22c55e"   // Green
     case .committed: return "#3b82f6"    // Blue
-    case .dedicated: return "#8b5cf6"    // Purple
+    case .dedicated: return "#007aff"    // Ocean Blue
     case .master: return "#f59e0b"       // Amber
     }
   }

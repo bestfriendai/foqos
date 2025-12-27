@@ -3,6 +3,7 @@ import SwiftUI
 
 struct ProfileInsightsView: View {
   @StateObject private var viewModel: ProfileInsightsUtil
+  @EnvironmentObject var themeManager: ThemeManager
   @Environment(\.dismiss) private var dismiss
 
   init(profile: BlockedProfiles) {
@@ -204,12 +205,12 @@ struct ProfileInsightsView: View {
                   x: .value("Date", item.date),
                   y: .value("Breaks", item.breaksCount)
                 )
-                .foregroundStyle(.purple)
+                .foregroundStyle(themeManager.themeColor)
                 AreaMark(
                   x: .value("Date", item.date),
                   y: .value("Breaks", item.breaksCount)
                 )
-                .foregroundStyle(.purple.opacity(0.2))
+                .foregroundStyle(themeManager.themeColor.opacity(0.2))
               } annotationValue: { selectedData in
                 "\(selectedData?.breaksCount ?? 0) breaks"
               }
@@ -245,12 +246,12 @@ struct ProfileInsightsView: View {
                   x: .value("Date", item.date),
                   y: .value("Minutes", avgDuration)
                 )
-                .foregroundStyle(.purple)
+                .foregroundStyle(themeManager.themeColor)
                 AreaMark(
                   x: .value("Date", item.date),
                   y: .value("Minutes", avgDuration)
                 )
-                .foregroundStyle(.purple.opacity(0.2))
+                .foregroundStyle(themeManager.themeColor.opacity(0.2))
               } annotationValue: { selectedData in
                 guard let data = selectedData, data.breaksCount > 0 else { return "0 min" }
                 let avgDuration = data.totalBreakDuration / Double(data.breaksCount) / 60.0
@@ -283,7 +284,7 @@ struct ProfileInsightsView: View {
                   x: .value("Hour", item.hour),
                   y: .value("Breaks", item.breaksStarted)
                 )
-                .foregroundStyle(.purple)
+                .foregroundStyle(themeManager.themeColor)
               } annotationValue: { selectedData in
                 "\(selectedData?.breaksStarted ?? 0) breaks started"
               }
@@ -316,7 +317,7 @@ struct ProfileInsightsView: View {
                   x: .value("Hour", item.hour),
                   y: .value("Breaks", item.breaksEnded)
                 )
-                .foregroundStyle(.purple.opacity(0.7))
+                .foregroundStyle(themeManager.themeColor.opacity(0.7))
               } annotationValue: { selectedData in
                 "\(selectedData?.breaksEnded ?? 0) breaks ended"
               }

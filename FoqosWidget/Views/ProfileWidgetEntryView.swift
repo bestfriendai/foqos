@@ -79,7 +79,7 @@ struct ProfileWidgetEntryView: View {
 
           Image(systemName: "hourglass")
             .font(.body)
-            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
         }
         .padding(.top, 8)
 
@@ -197,7 +197,7 @@ struct ProfileWidgetEntryView: View {
         VStack(alignment: .trailing, spacing: 8) {
           Image(systemName: entry.isSessionActive ? "shield.fill" : "shield")
             .font(.title)
-            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
 
           Spacer()
 
@@ -221,7 +221,7 @@ struct ProfileWidgetEntryView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(Color.purple)
+                .background(SharedData.themeColor)
                 .cornerRadius(8)
             }
           }
@@ -261,7 +261,7 @@ struct ProfileWidgetEntryView: View {
 
           Image(systemName: entry.isSessionActive ? "shield.fill" : "shield")
             .font(.largeTitle)
-            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
         }
 
         Divider()
@@ -363,7 +363,7 @@ struct ProfileWidgetEntryView: View {
             .foregroundColor(.white)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 12)
-            .background(Color.purple)
+            .background(SharedData.themeColor)
             .cornerRadius(12)
           }
         } else if entry.isBreakActive {

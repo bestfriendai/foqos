@@ -144,17 +144,18 @@ struct FocusSessionRecommendation {
 
 struct FocusModeStatusView: View {
   @ObservedObject var manager: FocusModeManager
+  @EnvironmentObject var themeManager: ThemeManager
 
   var body: some View {
     if manager.isAuthorized {
       HStack(spacing: Spacing.xs) {
         Image(systemName: manager.isFocusModeActive ? "moon.fill" : "moon")
-          .foregroundColor(manager.isFocusModeActive ? .purple : .secondary)
+          .foregroundColor(manager.isFocusModeActive ? themeManager.themeColor : .secondary)
 
         if manager.isFocusModeActive {
           Text("Focus Active")
             .font(.caption)
-            .foregroundColor(.purple)
+            .foregroundColor(themeManager.themeColor)
         }
       }
       .accessibilityElement(children: .combine)

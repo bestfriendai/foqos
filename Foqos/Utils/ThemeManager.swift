@@ -22,8 +22,8 @@ class ThemeManager: ObservableObject {
     ("Warm Sandstone", Color(hex: "#c4a77d")),
   ]
 
-  private static let defaultColorName = "Grimace Purple"
-  private static let fallbackColor = Color(hex: "#894fa3")  // Grimace Purple
+  private static let defaultColorName = "Ocean Blue"
+  private static let fallbackColor = Color(hex: "#007aff")  // Ocean Blue
 
   @AppStorage(
     "foqosThemeColorName", store: UserDefaults(suiteName: "group.dev.ambitionsoftware.foqos"))
