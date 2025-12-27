@@ -20,7 +20,8 @@ enum SharedData {
   }
 
   // MARK: - Theme Color Support for Widgets
-  private static let themeColors: [(name: String, hex: String)] = [
+  // Single source of truth for all theme colors (used by both main app and widgets)
+  static let themeColors: [(name: String, hex: String)] = [
     ("Grimace Purple", "#894fa3"),
     ("Ocean Blue", "#007aff"),
     ("Mint Fresh", "#00c6bf"),
@@ -231,5 +232,21 @@ extension Color {
       blue: Double(b) / 255,
       opacity: Double(a) / 255
     )
+  }
+
+  func toHex() -> String? {
+    let uiColor = UIColor(self)
+    var r: CGFloat = 0
+    var g: CGFloat = 0
+    var b: CGFloat = 0
+    var a: CGFloat = 0
+
+    guard uiColor.getRed(&r, green: &g, blue: &b, alpha: &a) else {
+      return nil
+    }
+
+    let rgb: Int = (Int)(r * 255) << 16 | (Int)(g * 255) << 8 | (Int)(b * 255) << 0
+
+    return String(format: "#%06x", rgb)
   }
 }

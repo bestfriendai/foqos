@@ -36,13 +36,17 @@ struct ProfileWidgetEntryView: View {
     return entry.useProfileURL == true
   }
 
+  // Static URLs that are guaranteed valid - safe to force unwrap known-good literals
+  private static let appURL = URL(string: "https://foqos.app")!
+  private static let defaultDeepLink = URL(string: "foqos://")!
+
   private var linkToOpen: URL {
     // Don't open the app via profile to stop the session
     if entry.isBreakActive || entry.isSessionActive {
-      return URL(string: "https://foqos.app")!
+      return Self.appURL
     }
 
-    return entry.deepLinkURL ?? URL(string: "foqos://")!
+    return entry.deepLinkURL ?? Self.defaultDeepLink
   }
 
   var body: some View {
