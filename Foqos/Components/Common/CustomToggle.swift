@@ -23,8 +23,8 @@ struct CustomToggle: View {
         .lineLimit(nil)
         .padding(.trailing, 80)
 
-      if isDisabled && errorMessage != nil {
-        Text(errorMessage!)
+      if isDisabled, let error = errorMessage {
+        Text(error)
           .font(.caption)
           .foregroundColor(.red)
       }

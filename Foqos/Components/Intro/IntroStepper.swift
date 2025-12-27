@@ -10,6 +10,7 @@ struct IntroStepper: View {
 
   @State private var buttonsVisible: Bool = false
   @Environment(\.accessibilityReduceMotion) var reduceMotion
+  @EnvironmentObject var themeManager: ThemeManager
 
   init(
     currentStep: Int,
@@ -75,7 +76,7 @@ struct IntroStepper: View {
             RoundedRectangle(cornerRadius: CornerRadius.md)
               .fill(
                 LinearGradient(
-                  gradient: Gradient(colors: [Color.purple, Color.purple.opacity(0.8)]),
+                  gradient: Gradient(colors: [themeManager.themeColor, themeManager.themeColor.opacity(0.8)]),
                   startPoint: .topLeading,
                   endPoint: .bottomTrailing
                 )

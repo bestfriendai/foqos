@@ -67,7 +67,7 @@ struct FoqosWidgetLiveActivity: Widget {
               .fontWeight(.bold)
               .foregroundColor(.primary)
             Image(systemName: "hourglass")
-              .foregroundColor(.purple)
+              .foregroundColor(SharedData.themeColor)
           }
 
           Text(context.attributes.name)
@@ -113,7 +113,7 @@ struct FoqosWidgetLiveActivity: Widget {
           VStack(spacing: 8) {
             HStack(spacing: 6) {
               Image(systemName: "hourglass")
-                .foregroundColor(.purple)
+                .foregroundColor(SharedData.themeColor)
               Text(context.attributes.name)
                 .font(.headline)
                 .fontWeight(.medium)
@@ -148,7 +148,7 @@ struct FoqosWidgetLiveActivity: Widget {
       } compactLeading: {
         // Compact leading state
         Image(systemName: "hourglass")
-          .foregroundColor(.purple)
+          .foregroundColor(SharedData.themeColor)
       } compactTrailing: {
         // Compact trailing state
         Text(
@@ -159,10 +159,10 @@ struct FoqosWidgetLiveActivity: Widget {
       } minimal: {
         // Minimal state
         Image(systemName: "hourglass")
-          .foregroundColor(.purple)
+          .foregroundColor(SharedData.themeColor)
       }
       .widgetURL(URL(string: "http://www.foqos.app"))
-      .keylineTint(Color.purple)
+      .keylineTint(SharedData.themeColor)
     }
   }
 }

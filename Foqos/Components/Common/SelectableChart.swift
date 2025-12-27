@@ -40,18 +40,17 @@ struct SelectableChart<X: Plottable & Comparable, Data: Identifiable, Content: C
           }
       }
     }
-    .chartXScale(domain: xAxisDomain())
+    .chartXScale(domain: xAxisDomain)
     .chartYScale(domain: yAxisDomain())
     .chartXSelection(value: $selectedX)
   }
 
-  private func xAxisDomain() -> ClosedRange<X> {
+  private var xAxisDomain: ClosedRange<X>? {
     let xValues = data.map(xValue)
-    if let minX = xValues.min(), let maxX = xValues.max() {
-      return minX...maxX
+    guard let minX = xValues.min(), let maxX = xValues.max() else {
+      return nil
     }
-    // Fallback - this shouldn't happen with valid data
-    return xValues.first!...xValues.first!
+    return minX...maxX
   }
 
   private func yAxisDomain() -> ClosedRange<Double> {

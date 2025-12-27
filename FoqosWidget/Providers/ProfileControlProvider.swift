@@ -87,13 +87,17 @@ struct ProfileControlProvider: AppIntentTimelineProvider {
     // Use the selected profile from configuration if available
     if let selectedProfile = configuration.profile {
       targetProfileId = selectedProfile.id
-      profileSnapshot = profileSnapshots[targetProfileId!]
+      if let id = targetProfileId {
+        profileSnapshot = profileSnapshots[id]
+      }
       profileName = selectedProfile.name
     } else {
       // Fallback: Show active session profile or most recent profile
       if let activeSession = activeSession {
         targetProfileId = activeSession.blockedProfileId.uuidString
-        profileSnapshot = profileSnapshots[targetProfileId!]
+        if let id = targetProfileId {
+          profileSnapshot = profileSnapshots[id]
+        }
         profileName = profileSnapshot?.name
       } else {
         // Find most recently updated profile

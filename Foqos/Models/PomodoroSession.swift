@@ -143,11 +143,11 @@ enum PomodoroPhase: String, Codable {
   var color: String {
     switch self {
     case .focus:
-      return "#8b5cf6"  // Purple
+      return "#007aff"  // Ocean Blue
     case .shortBreak:
       return "#22c55e"  // Green
     case .longBreak:
-      return "#3b82f6"  // Blue
+      return "#ff9500"  // Orange
     }
   }
 }

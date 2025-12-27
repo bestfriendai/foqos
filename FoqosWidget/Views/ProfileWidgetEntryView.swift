@@ -36,13 +36,17 @@ struct ProfileWidgetEntryView: View {
     return entry.useProfileURL == true
   }
 
+  // Static URLs that are guaranteed valid - safe to force unwrap known-good literals
+  private static let appURL = URL(string: "https://foqos.app")!
+  private static let defaultDeepLink = URL(string: "foqos://")!
+
   private var linkToOpen: URL {
     // Don't open the app via profile to stop the session
     if entry.isBreakActive || entry.isSessionActive {
-      return URL(string: "https://foqos.app")!
+      return Self.appURL
     }
 
-    return entry.deepLinkURL ?? URL(string: "foqos://")!
+    return entry.deepLinkURL ?? Self.defaultDeepLink
   }
 
   var body: some View {
@@ -51,6 +55,8 @@ struct ProfileWidgetEntryView: View {
       smallWidgetView
     case .systemMedium:
       mediumWidgetView
+    case .systemLarge:
+      largeWidgetView
     case .accessoryCircular:
       circularAccessoryView
     case .accessoryRectangular:
@@ -77,7 +83,7 @@ struct ProfileWidgetEntryView: View {
 
           Image(systemName: "hourglass")
             .font(.body)
-            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
         }
         .padding(.top, 8)
 
@@ -195,7 +201,7 @@ struct ProfileWidgetEntryView: View {
         VStack(alignment: .trailing, spacing: 8) {
           Image(systemName: entry.isSessionActive ? "shield.fill" : "shield")
             .font(.title)
-            .foregroundColor(shouldUseWhiteText ? .white : .purple)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
 
           Spacer()
 
@@ -219,10 +225,173 @@ struct ProfileWidgetEntryView: View {
                 .foregroundColor(.white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
-                .background(Color.purple)
+                .background(SharedData.themeColor)
                 .cornerRadius(8)
             }
           }
+        }
+      }
+      .padding()
+      .blur(radius: isUnavailable ? 3 : 0)
+
+      if isUnavailable {
+        unavailableOverlay
+      }
+    }
+  }
+
+  // MARK: - Large Widget View
+  private var largeWidgetView: some View {
+    ZStack {
+      VStack(spacing: 16) {
+        // Header section
+        HStack {
+          VStack(alignment: .leading, spacing: 4) {
+            Text(entry.profileName ?? "No Profile")
+              .font(.title2)
+              .fontWeight(.bold)
+              .foregroundColor(shouldUseWhiteText ? .white : .primary)
+              .lineLimit(1)
+
+            if let profile = entry.profileSnapshot {
+              let blockedCount = getBlockedCount(from: profile)
+              Text("\(blockedCount) apps and websites blocked")
+                .font(.subheadline)
+                .foregroundColor(shouldUseWhiteText ? .white.opacity(0.8) : .secondary)
+            }
+          }
+
+          Spacer()
+
+          Image(systemName: entry.isSessionActive ? "shield.fill" : "shield")
+            .font(.largeTitle)
+            .foregroundColor(shouldUseWhiteText ? .white : SharedData.themeColor)
+        }
+
+        Divider()
+          .opacity(shouldUseWhiteText ? 0.3 : 0.5)
+
+        // Status section
+        VStack(spacing: 12) {
+          HStack(spacing: 12) {
+            // Status indicator
+            VStack(alignment: .leading, spacing: 4) {
+              HStack(spacing: 6) {
+                Circle()
+                  .fill(entry.isSessionActive ? (entry.isBreakActive ? Color.orange : Color.green) : Color.gray)
+                  .frame(width: 10, height: 10)
+                Text(entry.isSessionActive ? (entry.isBreakActive ? "On Break" : "Active Session") : "Inactive")
+                  .font(.headline)
+                  .foregroundColor(shouldUseWhiteText ? .white : .primary)
+              }
+
+              if entry.isSessionActive, let startTime = entry.sessionStartTime {
+                HStack(spacing: 4) {
+                  Text("Started")
+                  Text(startTime, style: .relative)
+                  Text("ago")
+                }
+                .font(.caption)
+                .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
+              }
+            }
+
+            Spacer()
+
+            // Timer display
+            if entry.isSessionActive, let startTime = entry.sessionStartTime {
+              VStack(alignment: .trailing, spacing: 2) {
+                Text("Elapsed")
+                  .font(.caption)
+                  .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
+                Text(
+                  Date(
+                    timeIntervalSinceNow: startTime.timeIntervalSince1970
+                      - Date().timeIntervalSince1970
+                  ),
+                  style: .timer
+                )
+                .font(.title)
+                .fontWeight(.bold)
+                .foregroundColor(shouldUseWhiteText ? .white : .primary)
+                .monospacedDigit()
+              }
+            }
+          }
+
+          // Options summary
+          if let profile = entry.profileSnapshot {
+            HStack(spacing: 16) {
+              OptionBadge(
+                icon: "bell.fill",
+                text: "Reminders",
+                isEnabled: profile.reminderTimeInSeconds != nil,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "cup.and.saucer.fill",
+                text: "Breaks",
+                isEnabled: profile.enableBreaks,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "lock.fill",
+                text: "Strict",
+                isEnabled: profile.enableStrictMode,
+                useWhiteText: shouldUseWhiteText
+              )
+
+              OptionBadge(
+                icon: "antenna.radiowaves.left.and.right",
+                text: "Live",
+                isEnabled: profile.enableLiveActivity,
+                useWhiteText: shouldUseWhiteText
+              )
+            }
+            .frame(maxWidth: .infinity)
+          }
+        }
+
+        Spacer()
+
+        // Action section
+        if !entry.isSessionActive {
+          Link(destination: linkToOpen) {
+            HStack {
+              Image(systemName: "play.fill")
+              Text(quickLaunchEnabled ? "Tap to Launch" : "Tap to Open")
+            }
+            .font(.headline)
+            .foregroundColor(.white)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 12)
+            .background(SharedData.themeColor)
+            .cornerRadius(12)
+          }
+        } else if entry.isBreakActive {
+          HStack {
+            Image(systemName: "cup.and.saucer.fill")
+            Text("Taking a break...")
+          }
+          .font(.headline)
+          .foregroundColor(.white)
+          .frame(maxWidth: .infinity)
+          .padding(.vertical, 12)
+          .background(Color.orange.opacity(0.3))
+          .cornerRadius(12)
+        } else {
+          HStack {
+            Image(systemName: "shield.checkered")
+            Text("Focus session in progress")
+          }
+          .font(.headline)
+          .foregroundColor(.white)
+          .frame(maxWidth: .infinity)
+          .padding(.vertical, 12)
+          .background(Color.green.opacity(0.3))
+          .cornerRadius(12)
         }
       }
       .padding()
@@ -353,6 +522,35 @@ struct ProfileWidgetEntryView: View {
     if profile.schedule != nil { count += 1 }
     if profile.disableBackgroundStops == true { count += 1 }
     return count
+  }
+}
+
+// MARK: - Option Badge Component
+private struct OptionBadge: View {
+  let icon: String
+  let text: String
+  let isEnabled: Bool
+  let useWhiteText: Bool
+
+  var body: some View {
+    VStack(spacing: 4) {
+      Image(systemName: icon)
+        .font(.caption)
+        .foregroundColor(
+          isEnabled
+            ? (useWhiteText ? .white : .primary)
+            : (useWhiteText ? .white.opacity(0.3) : .secondary.opacity(0.5))
+        )
+
+      Text(text)
+        .font(.caption2)
+        .foregroundColor(
+          isEnabled
+            ? (useWhiteText ? .white.opacity(0.8) : .secondary)
+            : (useWhiteText ? .white.opacity(0.3) : .secondary.opacity(0.5))
+        )
+    }
+    .opacity(isEnabled ? 1.0 : 0.5)
   }
 }
 
@@ -534,6 +732,86 @@ struct ProfileWidgetEntryView: View {
     ),
     deepLinkURL: URL(string: "https://foqos.app/profile/\(unavailableProfileId.uuidString)"),
     focusMessage: "Different profile is currently active",
+    useProfileURL: true
+  )
+}
+
+#Preview(as: .systemLarge) {
+  ProfileControlWidget()
+} timeline: {
+  // Large widget - Active session
+  let largeProfileId = UUID()
+  ProfileWidgetEntry(
+    date: .now,
+    selectedProfileId: largeProfileId.uuidString,
+    profileName: "Deep Work Mode",
+    activeSession: SharedData.SessionSnapshot(
+      id: "large-session",
+      tag: "large-tag",
+      blockedProfileId: largeProfileId,
+      startTime: Date(timeIntervalSinceNow: -1800),  // Started 30 minutes ago
+      endTime: nil,
+      breakStartTime: nil,
+      breakEndTime: nil,
+      forceStarted: true
+    ),
+    profileSnapshot: SharedData.ProfileSnapshot(
+      id: largeProfileId,
+      name: "Deep Work Mode",
+      selectedActivity: FamilyActivitySelection(),
+      createdAt: Date(),
+      updatedAt: Date(),
+      blockingStrategyId: nil,
+      order: 0,
+      enableLiveActivity: true,
+      reminderTimeInSeconds: 3600,
+      customReminderMessage: nil,
+      enableBreaks: true,
+      enableStrictMode: true,
+      enableAllowMode: false,
+      enableAllowModeDomains: false,
+      enableSafariBlocking: true,
+      domains: ["twitter.com", "facebook.com", "instagram.com", "reddit.com"],
+      physicalUnblockNFCTagId: nil,
+      physicalUnblockQRCodeId: nil,
+      schedule: nil,
+      disableBackgroundStops: nil
+    ),
+    deepLinkURL: URL(string: "https://foqos.app/profile/\(largeProfileId.uuidString)"),
+    focusMessage: "Stay focused on what matters",
+    useProfileURL: true
+  )
+
+  // Large widget - Inactive
+  ProfileWidgetEntry(
+    date: .now,
+    selectedProfileId: "inactive-large",
+    profileName: "Weekend Focus",
+    activeSession: nil,
+    profileSnapshot: SharedData.ProfileSnapshot(
+      id: UUID(),
+      name: "Weekend Focus",
+      selectedActivity: FamilyActivitySelection(),
+      createdAt: Date(),
+      updatedAt: Date(),
+      blockingStrategyId: nil,
+      order: 0,
+      enableLiveActivity: false,
+      reminderTimeInSeconds: nil,
+      customReminderMessage: nil,
+      enableBreaks: false,
+      enableStrictMode: false,
+      enableAllowMode: true,
+      enableAllowModeDomains: true,
+      enableSafariBlocking: true,
+      domains: ["youtube.com"],
+      physicalUnblockNFCTagId: nil,
+      physicalUnblockQRCodeId: nil,
+      schedule: nil,
+      disableBackgroundStops: nil
+    ),
+    deepLinkURL: URL(string: "https://foqos.app/profile/inactive-large"),
+    focusMessage: "Ready to focus",
     useProfileURL: true
   )
 }

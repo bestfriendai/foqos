@@ -105,9 +105,9 @@ extension NFCScannerUtil: NFCTagReaderSessionDelegate {
 
   private func readMiFareTag(_ tag: NFCMiFareTag, session: NFCTagReaderSession) {
     tag.readNDEF { (message: NFCNDEFMessage?, error: Error?) in
-      if error != nil || message == nil {
-        let tagId = tag.identifier.hexEncodedString()
+      let tagId = tag.identifier.hexEncodedString()
 
+      guard error == nil, let message = message else {
         if let error = error {
           print(
             "⚠️ NDEF read failed (non-critical): \(error.localizedDescription). using tag id: \(tagId)"
@@ -123,9 +123,9 @@ extension NFCScannerUtil: NFCTagReaderSessionDelegate {
         return
       }
 
-      let url = self.updateWithNDEFMessageURL(message!)
+      let url = self.updateWithNDEFMessageURL(message)
       self.handleTagData(
-        id: tag.identifier.hexEncodedString(),
+        id: tagId,
         url: url,
         session: session
       )
@@ -134,9 +134,9 @@ extension NFCScannerUtil: NFCTagReaderSessionDelegate {
 
   private func readISO15693Tag(_ tag: NFCISO15693Tag, session: NFCTagReaderSession) {
     tag.readNDEF { (message: NFCNDEFMessage?, error: Error?) in
-      if error != nil || message == nil {
-        let tagId = tag.identifier.hexEncodedString()
+      let tagId = tag.identifier.hexEncodedString()
 
+      guard error == nil, let message = message else {
         if let error = error {
           print(
             "⚠️ ISO15693 NDEF read failed (non-critical): \(error.localizedDescription). using tag id: \(tagId)"
@@ -151,9 +151,9 @@ extension NFCScannerUtil: NFCTagReaderSessionDelegate {
         return
       }
 
-      let url = self.updateWithNDEFMessageURL(message!)
+      let url = self.updateWithNDEFMessageURL(message)
       self.handleTagData(
-        id: tag.identifier.hexEncodedString(),
+        id: tagId,
         url: url,
         session: session
       )

@@ -1,5 +1,6 @@
 import FamilyControls
 import Foundation
+import SwiftUI
 
 enum SharedData {
   private static let suite: UserDefaults = {
@@ -15,6 +16,35 @@ enum SharedData {
     case profileSnapshots
     case activeScheduleSession
     case completedScheduleSessions
+    case themeColorName
+  }
+
+  // MARK: - Theme Color Support for Widgets
+  // Single source of truth for all theme colors (used by both main app and widgets)
+  static let themeColors: [(name: String, hex: String)] = [
+    ("Grimace Purple", "#894fa3"),
+    ("Ocean Blue", "#007aff"),
+    ("Mint Fresh", "#00c6bf"),
+    ("Lime Zest", "#7fd800"),
+    ("Sunset Coral", "#ff5966"),
+    ("Hot Pink", "#ff2da5"),
+    ("Tangerine", "#ff9300"),
+    ("Lavender Dream", "#ba8eff"),
+    ("San Diego Merlot", "#7a1e3a"),
+    ("Forest Green", "#0b6e4f"),
+    ("Miami Vice", "#ff6ec7"),
+    ("Electric Lemonade", "#ccff00"),
+    ("Neon Grape", "#b026ff"),
+    ("Slate Stone", "#708090"),
+    ("Warm Sandstone", "#c4a77d"),
+  ]
+
+  static var themeColor: Color {
+    let colorName = suite.string(forKey: "foqosThemeColorName") ?? "Ocean Blue"
+    if let colorHex = themeColors.first(where: { $0.name == colorName })?.hex {
+      return Color(hex: colorHex)
+    }
+    return Color(hex: "#007aff")  // Ocean Blue default
   }
 
   // MARK: – Serializable snapshot of a profile (no sessions)
@@ -171,5 +201,52 @@ enum SharedData {
 
   static func setEndTime(date: Date) {
     activeSharedSession?.endTime = date
+  }
+}
+
+// MARK: - Color Hex Extension for Widget Support
+extension Color {
+  init(hex: String) {
+    let hex = hex.trimmingCharacters(in: CharacterSet.alphanumerics.inverted)
+    var int: UInt64 = 0
+    Scanner(string: hex).scanHexInt64(&int)
+    let a: UInt64
+    let r: UInt64
+    let g: UInt64
+    let b: UInt64
+    switch hex.count {
+    case 3:  // RGB (12-bit)
+      (a, r, g, b) = (255, (int >> 8) * 17, (int >> 4 & 0xF) * 17, (int & 0xF) * 17)
+    case 6:  // RGB (24-bit)
+      (a, r, g, b) = (255, int >> 16, int >> 8 & 0xFF, int & 0xFF)
+    case 8:  // ARGB (32-bit)
+      (a, r, g, b) = (int >> 24, int >> 16 & 0xFF, int >> 8 & 0xFF, int & 0xFF)
+    default:
+      (a, r, g, b) = (255, 0, 122, 255)  // Default to Ocean Blue
+    }
+
+    self.init(
+      .sRGB,
+      red: Double(r) / 255,
+      green: Double(g) / 255,
+      blue: Double(b) / 255,
+      opacity: Double(a) / 255
+    )
+  }
+
+  func toHex() -> String? {
+    let uiColor = UIColor(self)
+    var r: CGFloat = 0
+    var g: CGFloat = 0
+    var b: CGFloat = 0
+    var a: CGFloat = 0
+
+    guard uiColor.getRed(&r, green: &g, blue: &b, alpha: &a) else {
+      return nil
+    }
+
+    let rgb: Int = (Int)(r * 255) << 16 | (Int)(g * 255) << 8 | (Int)(b * 255) << 0
+
+    return String(format: "#%06x", rgb)
   }
 }
