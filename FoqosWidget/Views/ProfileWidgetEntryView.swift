@@ -282,9 +282,13 @@ struct ProfileWidgetEntryView: View {
               }
 
               if entry.isSessionActive, let startTime = entry.sessionStartTime {
-                Text("Started \(startTime, style: .relative) ago")
-                  .font(.caption)
-                  .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
+                HStack(spacing: 4) {
+                  Text("Started")
+                  Text(startTime, style: .relative)
+                  Text("ago")
+                }
+                .font(.caption)
+                .foregroundColor(shouldUseWhiteText ? .white.opacity(0.7) : .secondary)
               }
             }
 
@@ -724,6 +728,86 @@ private struct OptionBadge: View {
     ),
     deepLinkURL: URL(string: "https://foqos.app/profile/\(unavailableProfileId.uuidString)"),
     focusMessage: "Different profile is currently active",
+    useProfileURL: true
+  )
+}
+
+#Preview(as: .systemLarge) {
+  ProfileControlWidget()
+} timeline: {
+  // Large widget - Active session
+  let largeProfileId = UUID()
+  ProfileWidgetEntry(
+    date: .now,
+    selectedProfileId: largeProfileId.uuidString,
+    profileName: "Deep Work Mode",
+    activeSession: SharedData.SessionSnapshot(
+      id: "large-session",
+      tag: "large-tag",
+      blockedProfileId: largeProfileId,
+      startTime: Date(timeIntervalSinceNow: -1800),  // Started 30 minutes ago
+      endTime: nil,
+      breakStartTime: nil,
+      breakEndTime: nil,
+      forceStarted: true
+    ),
+    profileSnapshot: SharedData.ProfileSnapshot(
+      id: largeProfileId,
+      name: "Deep Work Mode",
+      selectedActivity: FamilyActivitySelection(),
+      createdAt: Date(),
+      updatedAt: Date(),
+      blockingStrategyId: nil,
+      order: 0,
+      enableLiveActivity: true,
+      reminderTimeInSeconds: 3600,
+      customReminderMessage: nil,
+      enableBreaks: true,
+      enableStrictMode: true,
+      enableAllowMode: false,
+      enableAllowModeDomains: false,
+      enableSafariBlocking: true,
+      domains: ["twitter.com", "facebook.com", "instagram.com", "reddit.com"],
+      physicalUnblockNFCTagId: nil,
+      physicalUnblockQRCodeId: nil,
+      schedule: nil,
+      disableBackgroundStops: nil
+    ),
+    deepLinkURL: URL(string: "https://foqos.app/profile/\(largeProfileId.uuidString)"),
+    focusMessage: "Stay focused on what matters",
+    useProfileURL: true
+  )
+
+  // Large widget - Inactive
+  ProfileWidgetEntry(
+    date: .now,
+    selectedProfileId: "inactive-large",
+    profileName: "Weekend Focus",
+    activeSession: nil,
+    profileSnapshot: SharedData.ProfileSnapshot(
+      id: UUID(),
+      name: "Weekend Focus",
+      selectedActivity: FamilyActivitySelection(),
+      createdAt: Date(),
+      updatedAt: Date(),
+      blockingStrategyId: nil,
+      order: 0,
+      enableLiveActivity: false,
+      reminderTimeInSeconds: nil,
+      customReminderMessage: nil,
+      enableBreaks: false,
+      enableStrictMode: false,
+      enableAllowMode: true,
+      enableAllowModeDomains: true,
+      enableSafariBlocking: true,
+      domains: ["youtube.com"],
+      physicalUnblockNFCTagId: nil,
+      physicalUnblockQRCodeId: nil,
+      schedule: nil,
+      disableBackgroundStops: nil
+    ),
+    deepLinkURL: URL(string: "https://foqos.app/profile/inactive-large"),
+    focusMessage: "Ready to focus",
     useProfileURL: true
   )
 }
